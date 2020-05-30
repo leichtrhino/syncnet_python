@@ -31,6 +31,7 @@ parser.add_argument('--min_track',      type=int, default=100,  help='Minimum fa
 parser.add_argument('--frame_rate',     type=int, default=25,   help='Frame rate');
 parser.add_argument('--num_failed_det', type=int, default=25,   help='Number of missed detections allowed before tracking is stopped');
 parser.add_argument('--min_face_size',  type=int, default=100,  help='Minimum face size in pixels');
+parser.add_argument('--sample_rate',    type=int, default=16000, help='Sample rate')
 opt = parser.parse_args();
 
 setattr(opt,'avi_dir',os.path.join(opt.data_dir,'pyavi'))
@@ -154,7 +155,7 @@ def crop_video(opt,track,cropfile):
 
   # ========== CROP AUDIO FILE ==========
 
-  command = ("ffmpeg -y -i %s -ss %.3f -to %.3f %s" % (os.path.join(opt.avi_dir,opt.reference,'audio.wav'),audiostart,audioend,audiotmp)) 
+  command = ("ffmpeg -y -i %s -ss %.3f -to %.3f %s" % (os.path.join(opt.avi_dir,opt.reference,'audio_out.wav'),audiostart,audioend,audiotmp)) 
   output = subprocess.call(command, shell=True, stdout=None)
 
   if output != 0:
@@ -287,6 +288,9 @@ command = ("ffmpeg -y -i %s -qscale:v 2 -threads 1 -f image2 %s" % (os.path.join
 output = subprocess.call(command, shell=True, stdout=None)
 
 command = ("ffmpeg -y -i %s -ac 1 -vn -acodec pcm_s16le -ar 16000 %s" % (os.path.join(opt.avi_dir,opt.reference,'video.avi'),os.path.join(opt.avi_dir,opt.reference,'audio.wav'))) 
+output = subprocess.call(command, shell=True, stdout=None)
+
+command = ("ffmpeg -y -i %s -ac 1 -vn -acodec pcm_s16le -ar %d %s" % (os.path.join(opt.avi_dir,opt.reference,'video.avi'),opt.sample_rate,os.path.join(opt.avi_dir,opt.reference,'audio_out.wav'))) 
 output = subprocess.call(command, shell=True, stdout=None)
 
 # ========== FACE DETECTION ==========
